@@ -6,6 +6,7 @@ local settings = require "mason-nvim-lint.settings"
 --@return unknown_linters string[]
 local function auto_install()
     local unknown_linters = {}
+    local missing_linter_mapping = {}
     local ignored_linters = {}
 
     for _, linter_names in pairs(nvim_lint.linters_by_ft) do
@@ -17,7 +18,11 @@ local function auto_install()
                 if mason_linter_identifier then
                     require "mason-nvim-lint.install".try_install(mason_linter_identifier)
                 else
-                    table.insert(unknown_linters, linter_name)
+                    if registry.has_package(linter_name) then
+                        table.insert(missing_linter_mapping, linter_name)
+                    else
+                        table.insert(unknown_linters, linter_name)
+                    end
                 end
             end
         end
@@ -25,8 +30,13 @@ local function auto_install()
 
     if #unknown_linters > 0 and not settings.current.quiet_mode then
         vim.notify(
-            ("Linters [%s] are absent in the mason's registry. Please, install them manually and remove from configuration.")
+            ("Linters [%s] are absent in the mason registry. Please, install them manually and remove from configuration.")
             :format(table.concat(unknown_linters, ", ")), vim.log.levels.WARN)
+    end
+    if #missing_linter_mapping > 0 and not settings.current.quiet_mode then
+        vim.notify(
+            ("Linters [%s] are missing in mapping, but found in the mason registry. Please, update mapping.")
+            :format(table.concat(missing_linter_mapping, ", ")), vim.log.levels.INFO)
     end
     if #ignored_linters > 0 and not settings.current.quiet_mode and settings.current.notify_ignored then
         vim.notify(
