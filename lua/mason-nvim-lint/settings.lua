@@ -11,6 +11,8 @@ local DEFAULT_SETTINGS = {
     ---@type string[]
     -- just like `zapling/mason-conform.nvim`, this option allows you to ignore certain linters from being installed.
     ignore_install = { },
+    ---@type boolean
+    notify_ignored = false,
 
     -- Whether linters that are set up (via nvim-lint) should be automatically installed if they're not already installed.
     -- It tries to find the specified linters in the mason's registry to proceed with installation.
